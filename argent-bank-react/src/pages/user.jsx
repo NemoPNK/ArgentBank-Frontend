@@ -1,14 +1,49 @@
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import Account from '../components/Account'
-import { useSelector } from 'react-redux'
-import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUser } from '../redux/authSlice'
+import { useEffect, useState } from 'react'
 
 function User() {
-  const user = useSelector((state) => state.auth.user)
+  const dispatch = useDispatch()
+  const { user, token } = useSelector((state) => state.auth)
 
   const [isEditing, setIsEditing] = useState(false)
   const [userName, setUserName] = useState(user?.userName || '')
+
+  useEffect(() => {
+    if (user?.userName) {
+      setUserName(user.userName)
+    }
+  }, [user])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      const response = await fetch(
+        'http://localhost:3001/api/v1/user/profile',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userName,
+          }),
+        }
+      )
+
+      const data = await response.json()
+
+      dispatch(setUser(data.body))
+      setIsEditing(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <>
@@ -19,13 +54,15 @@ function User() {
           <h1>
             Welcome back
             <br />
-            {user?.userName}!
+            {user?.firstName} {user?.lastName}!
           </h1>
 
           {isEditing ? (
-            <form>
-              <div className="input-wrapper">
-                <label htmlFor="username">Username</label>
+            <form className="edit-user-form" onSubmit={handleSubmit}>
+              <h2 className="edit-user-form-title">Edit user info</h2>
+
+              <div className="edit-input-wrapper">
+                <label htmlFor="username">User name:</label>
                 <input
                   type="text"
                   id="username"
@@ -34,7 +71,36 @@ function User() {
                 />
               </div>
 
-              <button className="edit-button">Save</button>
+              <div className="edit-input-wrapper">
+                <label htmlFor="firstName">First name:</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  value={user?.firstName || ''}
+                  disabled
+                />
+              </div>
+
+              <div className="edit-input-wrapper">
+                <label htmlFor="lastName">Last name:</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  value={user?.lastName || ''}
+                  disabled
+                />
+              </div>
+
+              <div className="edit-button-wrapper">
+                <button className="edit-button">Save</button>
+                <button
+                  type="button"
+                  className="edit-button"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           ) : (
             <button
