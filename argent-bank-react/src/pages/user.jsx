@@ -1,8 +1,15 @@
-import Header from '../components/header'
-import Footer from '../components/footer'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 import Account from '../components/Account'
+import { useSelector } from 'react-redux'
+import { useState } from 'react'
 
 function User() {
+  const user = useSelector((state) => state.auth.user)
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [userName, setUserName] = useState(user?.userName || '')
+
   return (
     <>
       <Header />
@@ -12,9 +19,31 @@ function User() {
           <h1>
             Welcome back
             <br />
-            Tony Jarvis!
+            {user?.userName}!
           </h1>
-          <button className="edit-button">Edit Name</button>
+
+          {isEditing ? (
+            <form>
+              <div className="input-wrapper">
+                <label htmlFor="username">Username</label>
+                <input
+                  type="text"
+                  id="username"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                />
+              </div>
+
+              <button className="edit-button">Save</button>
+            </form>
+          ) : (
+            <button
+              className="edit-button"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit Name
+            </button>
+          )}
         </div>
 
         <h2 className="sr-only">Accounts</h2>
