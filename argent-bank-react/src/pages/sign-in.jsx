@@ -31,6 +31,12 @@ function SignIn() {
       )
 
       const data = await response.json()
+
+      if (!response.ok) {
+        alert('Invalid email or password')
+        return
+      }
+
       const token = data.body.token
 
       dispatch(setToken(token))
@@ -51,13 +57,14 @@ function SignIn() {
       dispatch(setUser(profileData.body))
       navigate('/user')
     } catch (error) {
+      alert('Server error, please try again later')
       console.log(error)
     }
   }
   return (
     <>
       <Header />
-
+    
       <main className="main bg-dark">
         <section className="sign-in-content">
           <i className="fa fa-user-circle sign-in-icon"></i>
